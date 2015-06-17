@@ -46,8 +46,8 @@
       
       //Build pager navigation
       var pageNav = "<ul class='simplePagerNav'>";  
-          if(navigation){
-          pageNav += "<li class='prevPage'><a class='next' rel='' href='#'>&lt;</a></li>";  
+          if(options.navigation){
+          pageNav += "<li class='prevPage'><a class='next' rel='' href='javascript:;'>&lt;</a></li>";  
         }
       for (i=1;i<=pageCounter;i++){
         if (i==options.currentPage) {
@@ -57,8 +57,8 @@
           pageNav += "<li class='simplePageNav"+i+"'><a rel='"+i+"' href='#'>"+i+"</a></li>";
         }
       }
-        if(navigation){
-          pageNav += "<li class='nextPage'><a class='prev' rel='' href='#'>&gt;</a></li>";  
+        if(options.navigation){
+          pageNav += "<li class='nextPage'><a class='prev' rel='' href='javascript:;'>&gt;</a></li>";  
         }
       pageNav += "</ul>";
       
@@ -81,11 +81,11 @@
       }
 
       // Front / Back
-      if(navigation){
+      if(options.navigation){
         var nextNav = selector.parent().find(".simplePagerNav .nextPage");
         var prevNav = selector.parent().find(".simplePagerNav .prevPage");
         
-        nextNav.on("click",function(){
+        nextNav.click(function(){
             var clickedLink = options.currentPage + 1;
             if(pageCounter > options.currentPage){
               //remove current current (!) page
@@ -101,10 +101,11 @@
             if(options.currentPage != pageCounter){
               nextNav.show();
             }
+
           
         });
 
-        prevNav.on("click",function(){
+        prevNav.click(function(){
           var clickedLink = options.currentPage - 1;
             if(options.currentPage <= (pageCounter + 1) && clickedLink > 0){
               //remove current current (!) page
