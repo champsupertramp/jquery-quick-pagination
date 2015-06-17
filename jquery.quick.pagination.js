@@ -1,87 +1,154 @@
-/*
-  jQuery Quick Pagination v0.1.1
-  A lightweight pagination plugin for jQuery
-  Based on work by  Sam Deering - http://www.jquery4u.com  utorials/jquery-quick-pagination-list-items
 
-  Read more here: https://github.com/jlafitte/jquery-quick-pagination
-
-  Basic Usage: jQuery(<list selector>).quickPagination();
- */
-(function ($) {
-  "use strict";
-  $.fn.quickPagination = function (options) {
+(function($) {
+      
+  $.fn.quickPagination = function(options) {
+  
     var defaults = {
-      pageSize: 10,  // How many items you want to show per page.
-      currentPage: 1,  // Starting page... normally you would probably leave this alone.
-      holder: null,  // Container to place the navigation.
-      pagerLocation: "after",  // possible values are "before,after,both".  Will not do anything if you specified a container in the holder option.
-      transitionSpeed: null // Changes the speed items are faded in and out.  If left null then no transitions will happen.
+      pageSize: 10,
+      currentPage: 1,
+      holder: null,
+      pagerLocation: "after",
+      navigation: false,
     };
-    options = $.extend(defaults, options);
-    return this.each(function () {
-      var selector = $(this);
+    
+    var options = $.extend(defaults, options);
+    
+    
+    return this.each(function() {
+  
+            
+      var selector = $(this); 
       var pageCounter = 1;
-      if ($(".simplePagerContainer").length < 1) selector.wrap("<div class='simplePagerContainer'></div>");
+      
+      selector.wrap("<div class='simplePagerContainer'></div>");
+      
       selector.parents(".simplePagerContainer").find("ul.simplePagerNav").remove();
-      selector.children().removeClass(function (index, css) {
-        return (css.match(/simplePagerPage([0-9]+)?/ig) || []).join(' ');
-      }).filter(":visible").each(function (i) {
-        if (i < pageCounter * options.pageSize && i >= (pageCounter - 1) * options.pageSize) {
-          $(this).addClass("simplePagerPage" + pageCounter);
-        } else {
-          $(this).addClass("simplePagerPage" + (pageCounter + 1));
-          pageCounter++;
+      
+      selector.children().each(function(i){ 
+          
+        if(i < pageCounter*options.pageSize && i >= (pageCounter-1)*options.pageSize) {
+        $(this).addClass("simplePagerPage"+pageCounter);
         }
+        else {
+          $(this).addClass("simplePagerPage"+(pageCounter+1));
+          pageCounter ++;
+        } 
+        
       });
+      
+      // show/hide the appropriate regions 
       selector.children().hide();
-      selector.children(".simplePagerPage" + options.currentPage).show();
-      if (pageCounter <= 1) {
+      selector.children(".simplePagerPage"+options.currentPage).show();
+      
+      if(pageCounter <= 1) {
         return;
       }
-      var pageNav = "<ul class='simplePagerNav'>";
-      for (var i = 1; i <= pageCounter; i++) {
-        if (i == options.currentPage) {
-          pageNav += "<li class='page currentPage simplePageNav" + i + "'><a rel='" + i + "' href='#'>" + i + "</a></li>";
-        } else {
-          pageNav += "<li class='page simplePageNav" + i + "'><a rel='" + i + "' href='#'>" + i + "</a></li>";
+      
+      //Build pager navigation
+      var pageNav = "<ul class='simplePagerNav'>";  
+          if(navigation){
+          pageNav += "<li class='prevPage'><a class='next' rel='' href='#'>&lt;</a></li>";  
+        }
+      for (i=1;i<=pageCounter;i++){
+        if (i==options.currentPage) {
+          pageNav += "<li class='currentPage simplePageNav"+i+"'><a rel='"+i+"' href='#'>"+i+"</a></li>"; 
+        }
+        else {
+          pageNav += "<li class='simplePageNav"+i+"'><a rel='"+i+"' href='#'>"+i+"</a></li>";
         }
       }
+        if(navigation){
+          pageNav += "<li class='nextPage'><a class='prev' rel='' href='#'>&gt;</a></li>";  
+        }
       pageNav += "</ul>";
-      if (!options.holder) {
-        switch (options.pagerLocation) {
+      
+      if(!options.holder) {
+        switch(options.pagerLocation)
+        {
         case "before":
           selector.before(pageNav);
-          break;
+        break;
         case "both":
           selector.before(pageNav);
           selector.after(pageNav);
-          break;
+        break;
         default:
           selector.after(pageNav);
         }
-      } else {
+      }
+      else {
         $(options.holder).append(pageNav);
       }
-      selector.parent().find(".simplePagerNav a").click(function (e) {
-        e.preventDefault(); // keeps the page from jumping around by ignoring the #
+
+      // Front / Back
+      if(navigation){
+        var nextNav = selector.parent().find(".simplePagerNav .nextPage");
+        var prevNav = selector.parent().find(".simplePagerNav .prevPage");
+        
+        nextNav.on("click",function(){
+            var clickedLink = options.currentPage + 1;
+            if(pageCounter > options.currentPage){
+              //remove current current (!) page
+              $(this).parent("ul").parent(".simplePagerContainer").find("li.currentPage").removeClass("currentPage");
+              //Add current page highlighting
+              $(this).parent("ul").parent(".simplePagerContainer").find("a[rel='"+clickedLink+"']").parent("li").addClass("currentPage");
+              
+              selector.children().hide();     
+              selector.find(".simplePagerPage"+clickedLink).show();
+              options.currentPage++;
+              
+            }
+            if(options.currentPage != pageCounter){
+              nextNav.show();
+            }
+          
+        });
+
+        prevNav.on("click",function(){
+          var clickedLink = options.currentPage - 1;
+            if(options.currentPage <= (pageCounter + 1) && clickedLink > 0){
+              //remove current current (!) page
+              $(this).parent("ul").parent(".simplePagerContainer").find("li.currentPage").removeClass("currentPage");
+              //Add current page highlighting
+              $(this).parent("ul").parent(".simplePagerContainer").find("a[rel='"+clickedLink+"']").parent("li").addClass("currentPage");
+              options.currentPage--;
+
+              selector.children().hide();     
+              selector.find(".simplePagerPage"+clickedLink).show();
+            }
+
+            if(options.currentPage == pageCounter ){
+              nextNav.hide();
+            }
+        });
+      }
+      //pager navigation behaviour
+      selector.parent().find(".simplePagerNav a:not(.next,.prev)").click(function() {
+          
+        //grab the REL attribute 
         var clickedLink = $(this).attr("rel");
         options.currentPage = clickedLink;
-
-        var container = options.holder ? options.holder : ".simplePagerContainer";
-
-        $(this).parents(container).find("li.currentPage").removeClass("currentPage");
-        $(this).parents(container).find("a[rel='" + clickedLink + "']").parent("li").addClass("currentPage");
-
-        selector.children().hide();
-
-        if (options.transitionSpeed) {
-          selector.find(".simplePagerPage" + clickedLink).fadeIn(options.transitionSpeed);
-        } else {
-          selector.find(".simplePagerPage" + clickedLink).show();
+        
+        if(options.holder) {
+          $(this).parent("li").parent("ul").parent(options.holder).find("li.currentPage").removeClass("currentPage");
+          $(this).parent("li").parent("ul").parent(options.holder).find("a[rel='"+clickedLink+"']").parent("li").addClass("currentPage");
         }
-
+        else {
+          //remove current current (!) page
+          $(this).parent("li").parent("ul").parent(".simplePagerContainer").find("li.currentPage").removeClass("currentPage");
+          //Add current page highlighting
+          $(this).parent("li").parent("ul").parent(".simplePagerContainer").find("a[rel='"+clickedLink+"']").parent("li").addClass("currentPage");
+        }
+        
+        //hide and show relevant links
+        selector.children().hide();     
+        selector.find(".simplePagerPage"+clickedLink).show();
+        
         return false;
       });
     });
-  };
+  }
+  
+
 })(jQuery);
+
