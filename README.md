@@ -1,5 +1,5 @@
 Simple usage to enable next and previous navigation
-...
+...JavaScript
 jQuery("div#myPages").quickPagination({
 		pagerLocation:"both",
 		pageSize: 5,
