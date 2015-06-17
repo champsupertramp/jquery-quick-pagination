@@ -1,13 +1,14 @@
 h1, h2,ul {
 	clear: both;
 }
-
+ul.pagination li:hover,
 ul.pagination1 li:hover,
 ul.pagination2 li:hover,
 ul.pagination3 li:hover {
 	background-color: #FF9500;
 }
 
+ul.pagination li,
 ul.pagination1 li,
 ul.pagination2 li,
 ul.pagination3 li {
